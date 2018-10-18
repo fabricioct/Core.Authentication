@@ -23,13 +23,13 @@ namespace Core.Authentication
             using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
 
-                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-
-                {
-                    var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                    context.Database.Migrate();
-                    EnsureSeedData(context);
-                }
+                // Todo: Remover parar criar os controles de clientes,toekens no banco
+                //scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                //{
+                //    var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                //    context.Database.Migrate();
+                //    EnsureSeedData(context);
+                //}
 
                 {
                     var context = scope.ServiceProvider.GetService<ApplicationDbContext>();

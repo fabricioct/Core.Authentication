@@ -48,42 +48,50 @@ namespace Core.Authentication
             services.AddMvc();
 
             // configure identity server with in-memory stores, keys, clients and scopes
-            //services.AddIdentityServer()
-            //    .AddDeveloperSigningCredential()
-            //    .AddInMemoryPersistedGrants()
-            //    .AddInMemoryIdentityResources(Config.GetIdentityResources())
-            //    .AddInMemoryApiResources(Config.GetApiResources())
-            //    .AddInMemoryClients(Config.GetClients())
-            //    //.AddTestUsers(Config.GetUsers());
-            //    .AddAspNetIdentity<ApplicationUser>();
+            services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddInMemoryPersistedGrants()
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
+                .AddInMemoryApiResources(Config.GetApiResources())
+                .AddInMemoryClients(Config.GetClients())
+                //.AddTestUsers(Config.GetUsers());
+                .AddAspNetIdentity<ApplicationUser>();
 
-            var builder = services.AddIdentityServer(options =>
-            {
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseSuccessEvents = true;
-            })
-        .AddAspNetIdentity<ApplicationUser>()
-        // this adds the config data from DB (clients, resources)
-        .AddConfigurationStore(options =>
-        {
-            options.ConfigureDbContext = b =>
-                b.UseSqlite(connectionString,
-                    sql => sql.MigrationsAssembly(migrationsAssembly));
-        })
-        // this adds the operational data from DB (codes, tokens, consents)
-        .AddOperationalStore(options =>
-        {
-            options.ConfigureDbContext = b =>
-                b.UseSqlite(connectionString,
-                    sql => sql.MigrationsAssembly(migrationsAssembly));
+            // Todo: Remover parar criar os controles de clientes,toekens no banco
+            //var builder = services.AddIdentityServer(options =>
+            //{
+            //    options.Events.RaiseErrorEvents = true;
+            //    options.Events.RaiseInformationEvents = true;
+            //    options.Events.RaiseFailureEvents = true;
+            //    options.Events.RaiseSuccessEvents = true;
+            //})
+            //.AddAspNetIdentity<ApplicationUser>()
+            //// this adds the config data from DB (clients, resources)
+            //.AddConfigurationStore(options =>
+            //{
+            //    options.ConfigureDbContext = b =>
+            //        b.UseSqlite(connectionString,
+            //            sql => sql.MigrationsAssembly(migrationsAssembly));
+            //})
+            //// this adds the operational data from DB (codes, tokens, consents)
+            //.AddOperationalStore(options =>
+            //{
+            //    options.ConfigureDbContext = b =>
+            //        b.UseSqlite(connectionString,
+            //            sql => sql.MigrationsAssembly(migrationsAssembly));
 
-            // this enables automatic token cleanup. this is optional.
-            options.EnableTokenCleanup = true;
-            // options.TokenCleanupInterval = 15; // frequency in seconds to cleanup stale grants. 15 is useful during debugging
-        });
-
+            //    // this enables automatic token cleanup. this is optional.
+            //    options.EnableTokenCleanup = true;
+            //    // options.TokenCleanupInterval = 15; // frequency in seconds to cleanup stale grants. 15 is useful during debugging
+            //});
+            //if (Environment.IsDevelopment())
+            //{
+            //    builder.AddDeveloperSigningCredential();
+            //}
+            //else
+            //{
+            //    throw new Exception("need to configure key material");
+            //}
 
         }
 
@@ -105,12 +113,6 @@ namespace Core.Authentication
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();
 
-            //app.UseMvc(routes =>
-            //{
-            //    routes.MapRoute(
-            //        name: "default",
-            //        template: "{controller=Home}/{action=Index}/{id?}");
-            //});
         }
     }
 }
