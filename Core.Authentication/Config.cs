@@ -18,6 +18,12 @@ namespace Core.Authentication
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
+                new IdentityResources.Email(),
+                new IdentityResource
+                {
+                    Name = "role",
+                    UserClaims = new List<string> {"role"}
+                }
             };
         }
 
@@ -25,7 +31,17 @@ namespace Core.Authentication
         {
             return new List<ApiResource>
             {
-                new ApiResource("api1", "My API")
+                new ApiResource {
+                Name = "api1",
+                DisplayName = "Custom API",
+                Description = "Custom API Access",
+                UserClaims = new List<string> {"role"},
+                ApiSecrets = new List<Secret> {new Secret("scopeSecret".Sha256())},
+                Scopes = new List<Scope> {
+                    new Scope("customAPI.read"),
+                    new Scope("customAPI.write")
+                }
+            }
             };
         }
 
@@ -40,7 +56,7 @@ namespace Core.Authentication
                     ClientId = "client",
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
 
-                    ClientSecrets = 
+                    ClientSecrets =
                     {
                         new Secret("secret".Sha256())
                     },
@@ -53,7 +69,7 @@ namespace Core.Authentication
                     ClientId = "ro.client",
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
-                    ClientSecrets = 
+                    ClientSecrets =
                     {
                         new Secret("secret".Sha256())
                     },
@@ -65,9 +81,9 @@ namespace Core.Authentication
                 {
                     ClientId = "mvc",
                     ClientName = "MVC Client",
-                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+                    AllowedGrantTypes = GrantTypes.Implicit,
 
-                    ClientSecrets = 
+                    ClientSecrets =
                     {
                         new Secret("secret".Sha256())
                     },
@@ -75,13 +91,14 @@ namespace Core.Authentication
                     RedirectUris = { "http://localhost:5002/signin-oidc" },
                     PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },
 
-                    AllowedScopes = 
+                    AllowedScopes =
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
-                    },
-                    AllowOfflineAccess = true
+                        IdentityServerConstants.StandardScopes.Email,
+                        "role",
+                       "customAPI.read"
+                    }
                 },
 
                 // JavaScript Client
