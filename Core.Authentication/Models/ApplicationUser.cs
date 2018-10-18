@@ -2,7 +2,7 @@
 
 namespace Core.Authentication.Models
 {
-    internal class ApplicationUser : IdentityUser             
+    public class ApplicationUser : IdentityUser             
     {
     }
 }
