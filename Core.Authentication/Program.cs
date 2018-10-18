@@ -14,11 +14,27 @@ namespace Core.Authentication
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            var seed = args.Contains("/seed");
+
+            if (seed)
+                args = args.Except(new[] { "/seed" }).ToArray();
+
+            var host = BuildWebHost(args);
+
+            if (seed)
+                SeedData.EnsureSeedData(host.Services);
+
+            host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .ConfigureLogging(builder =>
+                {
+                    builder.ClearProviders();
+                    //builder.AddSerilog();
+                })
+                .UseStartup<Startup>()
+                .Build();
     }
 }
