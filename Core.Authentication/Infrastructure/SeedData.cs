@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Core.Authentication
+namespace Core.Authentication.Infrastructure
 {
     public class SeedData
     {
@@ -122,7 +122,7 @@ namespace Core.Authentication
             if (!context.Clients.Any())
             {
                 Console.WriteLine("Clients being populated");
-                foreach (var client in Config.GetClients().ToList())
+                foreach (var client in InMemoryConfig.GetClients().ToList())
                 {
                     context.Clients.Add(client.ToEntity());
                 }
@@ -136,7 +136,7 @@ namespace Core.Authentication
             if (!context.IdentityResources.Any())
             {
                 Console.WriteLine("IdentityResources being populated");
-                foreach (var resource in Config.GetIdentityResources().ToList())
+                foreach (var resource in InMemoryConfig.GetIdentityResources().ToList())
                 {
                     context.IdentityResources.Add(resource.ToEntity());
                 }
@@ -150,7 +150,7 @@ namespace Core.Authentication
             if (!context.ApiResources.Any())
             {
                 Console.WriteLine("ApiResources being populated");
-                foreach (var resource in Config.GetApiResources().ToList())
+                foreach (var resource in InMemoryConfig.GetApiResources().ToList())
                 {
                     context.ApiResources.Add(resource.ToEntity());
                 }

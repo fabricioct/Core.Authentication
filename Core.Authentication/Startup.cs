@@ -14,86 +14,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Core.Authentication.Infrastructure;
 
 namespace Core.Authentication
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }
+        public IHostingEnvironment Environment { get; }     
+        private readonly string connectionString;
 
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
             Environment = environment;
+            this.connectionString = Configuration.GetConnectionString("DefaultConnection");
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
-            // Todo: Utilizando SQL Server produção
-            // services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-
-            // Todo: Utilizando SQLListe para testeh Microsoft.EntityFrameworkCore.Sqlite
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
-
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            // Iniciar IdentityServer utilizando extenssion class 
+            services.IdentityServerInMemory(connectionString);
 
             services.AddMvc();
 
-            // configure identity server with in-memory stores, keys, clients and scopes
-            services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddInMemoryPersistedGrants()
-                .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddInMemoryApiResources(Config.GetApiResources())
-                .AddInMemoryClients(Config.GetClients())
-                //.AddTestUsers(Config.GetUsers());
-                .AddAspNetIdentity<ApplicationUser>();
-
-            // Todo: Remover parar criar os controles de clientes,toekens no banco
-            //var builder = services.AddIdentityServer(options =>
-            //{
-            //    options.Events.RaiseErrorEvents = true;
-            //    options.Events.RaiseInformationEvents = true;
-            //    options.Events.RaiseFailureEvents = true;
-            //    options.Events.RaiseSuccessEvents = true;
-            //})
-            //.AddAspNetIdentity<ApplicationUser>()
-            //// this adds the config data from DB (clients, resources)
-            //.AddConfigurationStore(options =>
-            //{
-            //    options.ConfigureDbContext = b =>
-            //        b.UseSqlite(connectionString,
-            //            sql => sql.MigrationsAssembly(migrationsAssembly));
-            //})
-            //// this adds the operational data from DB (codes, tokens, consents)
-            //.AddOperationalStore(options =>
-            //{
-            //    options.ConfigureDbContext = b =>
-            //        b.UseSqlite(connectionString,
-            //            sql => sql.MigrationsAssembly(migrationsAssembly));
-
-            //    // this enables automatic token cleanup. this is optional.
-            //    options.EnableTokenCleanup = true;
-            //    // options.TokenCleanupInterval = 15; // frequency in seconds to cleanup stale grants. 15 is useful during debugging
-            //});
-            //if (Environment.IsDevelopment())
-            //{
-            //    builder.AddDeveloperSigningCredential();
-            //}
-            //else
-            //{
-            //    throw new Exception("need to configure key material");
-            //}
-
         }
+        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -108,7 +56,6 @@ namespace Core.Authentication
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
             app.UseStaticFiles();
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();
