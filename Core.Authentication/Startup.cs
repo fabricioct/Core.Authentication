@@ -1,20 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Core.Authentication.Data;
-using Core.Authentication.Models;
-using IdentityServer4;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Core.Authentication.Infrastructure;
+using System.Reflection;
 
 namespace Core.Authentication
 {
@@ -35,8 +24,14 @@ namespace Core.Authentication
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<IISOptions>(iis =>
+            {
+                iis.AuthenticationDisplayName = "Windows";
+                iis.AutomaticAuthentication = false;
+            });
+
             // Iniciar IdentityServer utilizando extenssion class 
-            services.IdentityServerInMemory(connectionString);
+            services.IdentityServerSQLlite(connectionString);
 
             services.AddMvc();
 
@@ -56,10 +51,12 @@ namespace Core.Authentication
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.InitData();
+
             app.UseStaticFiles();
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();
-
         }
     }
 }

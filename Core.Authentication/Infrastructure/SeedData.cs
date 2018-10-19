@@ -24,12 +24,12 @@ namespace Core.Authentication.Infrastructure
             {
 
                 // Todo: Remover parar criar os controles de clientes,toekens no banco
-                //scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-                //{
-                //    var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                //    context.Database.Migrate();
-                //    EnsureSeedData(context);
-                //}
+                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                    context.Database.Migrate();
+                    EnsureSeedData(context);
+                }
 
                 {
                     var context = scope.ServiceProvider.GetService<ApplicationDbContext>();

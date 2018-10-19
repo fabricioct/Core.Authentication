@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityModel;
-using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using static IdentityServer4.IdentityServerConstants;
 
 namespace Core.Authentication.Infrastructure
 {
-    public class InMemoryConfig
+    public static class InMemoryConfig
     {
         // scopes define the resources in your system
         public static IEnumerable<IdentityResource> GetIdentityResources()
@@ -22,11 +21,11 @@ namespace Core.Authentication.Infrastructure
                 new IdentityResources.Profile(),
                 new IdentityResources.Email(),
                 new IdentityResource
-                {                   
+                {
                     Name = "role",
                     DisplayName = "Permitir roles",
-                    Required = true,   
-                    
+                    Required = true,
+
                     UserClaims = new[] { JwtClaimTypes.Role}
                 }
             };
@@ -69,7 +68,7 @@ namespace Core.Authentication.Infrastructure
                     },
 
                     RedirectUris = { "http://localhost:5002/signin-oidc" },
-                    PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },                   
+                    PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },
                     AllowedScopes =
                     {
                         StandardScopes.OpenId,
@@ -91,26 +90,25 @@ namespace Core.Authentication.Infrastructure
             {
                 new TestUser
                 {
-                    SubjectId = "1",
-                    Username = "alice",
-                    Password = "password",
-
-                    Claims = new List<Claim>
-                    {
-                        new Claim("name", "Alice"),
-                        new Claim("website", "https://alice.com")
+                    SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
+                    Username = "admin",
+                    Password = "Pass123$",
+                     Claims = new List<Claim> {
+                        new Claim(JwtClaimTypes.Email, "bob@bob.com"),
+                        new Claim(JwtClaimTypes.Role, "admin"),
+                        new Claim(JwtClaimTypes.EmailVerified, "true", System.Security.Claims.ClaimValueTypes.Boolean)
                     }
                 },
                 new TestUser
                 {
-                    SubjectId = "2",
+                    SubjectId = "0EA50EBE-BAE6-46C1-9F7B-A427F3C7A129",
                     Username = "bob",
-                    Password = "password",
-
+                    Password = "Pass123$",
                     Claims = new List<Claim>
                     {
-                        new Claim("name", "Bob"),
-                        new Claim("website", "https://bob.com")
+                        new Claim(JwtClaimTypes.Email, "bob@bob.com"),
+                        new Claim(JwtClaimTypes.Role, "usuario"),
+                        new Claim(JwtClaimTypes.EmailVerified, "true", System.Security.Claims.ClaimValueTypes.Boolean)
                     }
                 }
             };
