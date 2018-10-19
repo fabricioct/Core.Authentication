@@ -9,15 +9,15 @@ namespace Core.Authentication
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }     
+        private readonly IConfiguration configuration;
+        private readonly IHostingEnvironment environment;    
         private readonly string connectionString;
 
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
-            Configuration = configuration;
-            Environment = environment;
-            this.connectionString = Configuration.GetConnectionString("DefaultConnection");
+            this.configuration = configuration;
+            this.environment = environment;
+            this.connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -30,14 +30,13 @@ namespace Core.Authentication
                 iis.AutomaticAuthentication = false;
             });
 
-            // Iniciar IdentityServer utilizando extenssion class 
-            services.IdentityServerSQLlite(connectionString);
-
             services.AddMvc();
+
+            // Iniciar IdentityServer utilizando extension class 
+            services.IdentityServerInMemory(connectionString);           
 
         }
         
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -51,8 +50,6 @@ namespace Core.Authentication
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            app.InitData();
 
             app.UseStaticFiles();
             app.UseIdentityServer();

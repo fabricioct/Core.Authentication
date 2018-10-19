@@ -1,11 +1,14 @@
 ﻿using Core.Authentication.Data;
 using Core.Authentication.Models;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Core.Authentication.Infrastructure
@@ -46,6 +49,8 @@ namespace Core.Authentication.Infrastructure
                 .AddInMemoryApiResources(InMemoryConfig.GetApiResources())
                 .AddInMemoryClients(InMemoryConfig.GetClients())
                 .AddAspNetIdentity<ApplicationUser>();
+
+            InitUserDataBase(services.BuildServiceProvider());
 
         }
 
@@ -115,6 +120,90 @@ namespace Core.Authentication.Infrastructure
             //{
             //    throw new Exception("need to configure key material");
             //}
+            //var serviceProvider = services.BuildServiceProvider();
+            InitDataBase(services.BuildServiceProvider());
+        }
+        
+        private static void InitDataBase(IServiceProvider service)
+        {
+            using (var scope = service.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>().Database.Migrate();
+                scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+
+                var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+
+                if (!context.Clients.Any())
+                {
+                    foreach (var client in InMemoryConfig.GetClients())
+                    {
+                        context.Clients.Add(client.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.IdentityResources.Any())
+                {
+                    foreach (var resource in InMemoryConfig.GetIdentityResources())
+                    {
+                        context.IdentityResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.ApiResources.Any())
+                {
+                    foreach (var resource in InMemoryConfig.GetApiResources())
+                    {
+                        context.ApiResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                if (!userManager.Users.Any())
+                {
+                    foreach (var testUser in InMemoryConfig.GetUsers())
+                    {
+                        var identityUser = new ApplicationUser()
+                        {
+                            Id = testUser.SubjectId,
+                            UserName = testUser.Username
+                        };
+
+                        userManager.CreateAsync(identityUser, testUser.Password).Wait();
+                        userManager.AddClaimsAsync(identityUser, testUser.Claims.ToList()).Wait();
+                    }
+
+                }
+            }
+        }
+
+        private static void InitUserDataBase(IServiceProvider service)
+        {
+            using (var scope = service.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                if (!userManager.Users.Any())
+                {
+                    foreach (var testUser in InMemoryConfig.GetUsers())
+                    {
+                        var identityUser = new ApplicationUser()
+                        {
+                            Id = testUser.SubjectId,
+                            UserName = testUser.Username
+                        };
+
+                        userManager.CreateAsync(identityUser, testUser.Password).Wait();
+                        userManager.AddClaimsAsync(identityUser, testUser.Claims.ToList()).Wait();
+                    }
+
+                }
+            }
         }
     }
 }

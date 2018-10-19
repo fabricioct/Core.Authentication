@@ -25,7 +25,6 @@ namespace Core.Authentication.Infrastructure
                     Name = "role",
                     DisplayName = "Permitir roles",
                     Required = true,
-
                     UserClaims = new[] { JwtClaimTypes.Role}
                 }
             };
